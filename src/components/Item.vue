@@ -17,6 +17,17 @@
           <el-image></el-image>
       </div>
     </div>
+    <el-button @click=" () => {
+      console.log('fa')
+      viewVisiable = !viewVisiable
+    }">
+      起飞
+    </el-button>
+      <AboutView
+        v-model:visible="viewVisiable"
+      >
+
+      </AboutView>
 
     <el-pagination
         small
@@ -37,9 +48,10 @@
     import qs from "qs";
     import {BasePage} from "@/type/global";
     import {getItemPageReq, Product} from "@/api/Item";
+    import AboutView from "@/views/AboutView.vue";
 
 
-
+    const viewVisiable = ref(false);
     const ItemList = ref<Product[]>([])
 
 
