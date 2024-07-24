@@ -42,11 +42,11 @@
 </template>
 
 <script setup lang="ts">
-    import {Item} from "@/DictType/DItem";
+    import {Item} from "@/DictType_nouse/DItem";
     import {ComponentInternalInstance, getCurrentInstance, onBeforeMount, onMounted, reactive, ref, watch} from "vue";
     import request from "@/utils/request";
     import qs from "qs";
-    import {BasePage} from "@/type/global";
+    import {BasePage} from "@/types/global";
     import {getItemPageReq, Product} from "@/api/Item";
     import AboutView from "@/views/AboutView.vue";
 

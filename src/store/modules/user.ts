@@ -1,13 +1,14 @@
 import { defineStore } from 'pinia'
-import { DUser } from '../../../../vue3-fast-cms/vue3-fast-cms/src/DictType/DUser'
+
 
 import {ElNotification} from "element-plus";
 import request from "@/utils/request";
+import {User} from "@/api/User";
 
 // 定义 state 类型
 interface State {
     token: string | null  ,
-    user: DUser | null,
+    user: User | null,
 }
 
 // 创建 Pinia store
@@ -17,7 +18,7 @@ const useUserStore = defineStore('user', {
         user: localStorage.getItem('userInfo') ? JSON.parse(localStorage.getItem('userInfo')!) : null
     }),
     actions: {
-         login(u: DUser)  {
+         login(u: User)  {
             this.user = u
         },
         logout() {

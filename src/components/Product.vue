@@ -60,7 +60,7 @@ import {onBeforeMount, onMounted, reactive, ref} from "vue";
 import type { UploadInstance, UploadProps} from "element-plus";
 import {ElNotification} from "element-plus";
 import request from "@/utils/request";
-import {pros} from "@/DictType/DProduct";
+import {pros} from "@/DictType_nouse/DProduct";
 import axios from "axios";
 import qs from "qs";
   const uploadRef = ref<UploadInstance>()

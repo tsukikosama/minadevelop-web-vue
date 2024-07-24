@@ -23,7 +23,7 @@ const routes: Array<RouteRecordRaw> = [
       },
       {
 
-        path:'/type',
+        path:'/types',
         name:'分类',
         component:() => import('../page/TypePage.vue')
       },
@@ -42,6 +42,11 @@ const routes: Array<RouteRecordRaw> = [
     path:'/reg',
     name:'注册',
     component:() => import('../page/RegPage.vue')
+  },
+  {
+    path:'/chat',
+    name:'聊天',
+    component:() => import('../page/ChatPage.vue')
   }
 
 ]

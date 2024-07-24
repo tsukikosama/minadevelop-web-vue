@@ -1,4 +1,4 @@
-import {BasePage, PageDataRes, PageRes} from "@/type/global";
+import {BasePage, PageDataRes, PageRes} from "@/types/global";
 import request from "@/utils/request";
 import qs from 'query-string';
 

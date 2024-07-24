@@ -5,7 +5,7 @@
       <el-radio-button v-for="(item,index) in types" :key="index" :label=item.typeName :value=item.typeId @change="checkType(item)" />
 
     </el-radio-group>
-      <!--    类型分类:<el-check-tag v-for="(item,index) in types" :key="index" :checked="item.check" type="primary" >-->
+      <!--    类型分类:<el-check-tag v-for="(item,index) in types" :key="index" :checked="item.check" types="primary" >-->
       <!--      {{item.typeName}}-->
       <!--    </el-check-tag>-->
     </div>
@@ -26,7 +26,7 @@
 
 <script lang="ts" setup>
 import {ComponentInternalInstance, getCurrentInstance, onBeforeMount, reactive, ref} from "vue";
-import {Tag, Type} from "@/DictType/DType";
+import {Tag, Type} from "@/DictType_nouse/DType";
 import request from "@/utils/request";
 import {ElNotification} from "element-plus";
 import Item from "@/components/Item.vue";

@@ -1,6 +1,6 @@
 // import { InjectionKey } from 'vue'
 // import { createStore, Store } from 'vuex'
-// import {DUser} from "@/DictType/DUser";
+// import {DUser} from "@/DictType_nouse/DUser";
 //
 //
 // // 为 store state 声明类型

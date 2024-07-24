@@ -33,7 +33,7 @@
       </div>
       <div>
         <el-button type="primary"  @click="login()">登录</el-button>
-<!--        <el-button type="primary" :disabled=!capater.isCapater @click="login()">登录</el-button>-->
+<!--        <el-button types="primary" :disabled=!capater.isCapater @click="login()">登录</el-button>-->
         <el-button  @click="resetForm()">清空</el-button>
       </div>
     </el-form>
@@ -113,7 +113,6 @@ const login =  () => {
       ElNotification.success("欢迎回来:"+res.data.nickname)
       //把用户信息存入浏览器缓存中
       if(rememberme.isRememberme) {
-
         localStorage.setItem('token',res.data.tokenValue);
         localStorage.setItem("userInfo", jsonstr);
       }
