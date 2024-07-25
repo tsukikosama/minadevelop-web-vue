@@ -16,15 +16,15 @@ export function useWebSocket() {
 
     // const messages:Message = ref<Message|null>(null);
     // const uid = rt.query.uid as string
-    function connect(uid:string) {
+    function connect(uid:number|string) {
         ws!.value = new WebSocket('ws://localhost:8099/websocket?userId='+uid);
         ws!.value.onopen = function () {
             console.log('开始连接');
 
 
             let test: Message = {
-                msgSend: "1",
-                msgReceiver: "2",
+                msgSend: 1,
+                msgReceiver: 2,
                 msgContent: "3",
                 msgType: 3
             }

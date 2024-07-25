@@ -30,20 +30,20 @@
   <el-input v-model="msgContent" >
 
   </el-input>
-  <el-span v-for="(item,index) in userList" :key="index" @click="">
-    <el-button @click="msgReceiver = item.userId">{{item.nickname}}</el-button>
+  <el-span v-for="(value,key) in msgMap" :key="key" @click="">
+    <el-button @click="changeBox(key)">{{value[0].receiverNickname}}</el-button>
+
   </el-span>
   <el-button @click="send()">发送</el-button>
-
 
 
 </template>
 
 <script setup lang="ts">
 
-import {computed, onMounted, Ref, ref} from 'vue'
+import {computed, onMounted, Ref, ref, watch} from 'vue'
 import {getUserList, User} from "@/api/User";
-import {getMsgDetails, Message, sendMsg} from "@/api/Message";
+import {getMsgDetails, Message, MessageDetail, sendMsg} from "@/api/Message";
 import {useRoute} from "vue-router";
 import {useWebSocket} from "@/websocket/mywebsocket";
 import {UserMsg} from "@/websocket/websocketApi";
@@ -51,23 +51,16 @@ import {UserMsg} from "@/websocket/websocketApi";
 
 const  rt  = useRoute();
 
-const msgReceiver = ref<string>('');
+const msgReceiver = ref<number>(-1);
 const msgContent = ref<string>('');
 const msgSend = rt.query.uid as string
-
+const chatBox = ref<MessageDetail[]>([]);
 const count = ref(10)
 const loading = ref(false)
 const noMore = computed(() => count.value >= 20)
 const disabled = computed(() => loading.value || noMore.value)
-
+const msgMap  = ref<Map<number,MessageDetail[]>>();
 const { connect, sendMessage } = useWebSocket();
-// const load = () => {
-//   loading.value = true
-//   setTimeout(() => {
-//     count.value += 2
-//     loading.value = false
-//   }, 2000)
-// }
 const userList = ref<User[]>([])
 //获取全部的用户对象
 onMounted(async () => {
@@ -81,23 +74,36 @@ onMounted( () => {
 })
 onMounted(async () => {
   const { data } = await getMsgDetails(msgSend);
-  console.log(data)
+  console.log(data.get(0))
+  // for (let i = 0 ; i < data.values() ; i++){
+  //   console.log(data)
+  //   console.log(data.entries())
+  // }
+  // console.log( typeof data)
+  // msgMap.value = data
+
 })
-// const sendMessage = async () => {
-//    const { data } = await sendMsg(MsgForm.value);
-// }
+
   function send() {
     let msg = UserMsg(msgSend,msgReceiver.value,msgContent.value);
     useWebSocket().sendMessage(msg);
     msgContent.value = "";
   }
+  const changeBox = (str:any) => {
+    console.log(str)
+    msgReceiver.value = str
+     let s =  msgMap.value!.get(str);
+     console.log(s)
+  }
+/**
+ * 检测到msgReceiver发生变话去更新对话框
+ */
+  watch(msgReceiver ,(newValue,OldValue,onCleanup) =>{
+    console.log("6666")
+    console.log(msgMap.value!.get(newValue))
 
-  // return {
-  //   msg,
-  //   connect,
-  //   sendMessage: send,
-  //   messages
-  // }
+    // chatBox.value = msgMap.value.get(newValue)!;
+  })
 </script>
 
 <style scoped>

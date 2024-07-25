@@ -7,10 +7,11 @@ import {Message} from "@/api/Message";
  */
 export function SystemMsg(msg: string) {
     let SystemMsg: Message = {
-        msgSend: "system",
-        msgReceiver: "",
+        msgSend: -1,
+        msgReceiver: -1,
         msgContent: msg,
-        msgType: 3
+        msgType: 3,
+
     }
     return SystemMsg;
 }
@@ -22,7 +23,7 @@ export function SystemMsg(msg: string) {
  * @param msg
  * @constructor
  */
-export function UserMsg(sendUid: string, receverUid: string ,msg: string){
+export function UserMsg(sendUid: number | string, receverUid: number ,msg: string){
     let UserMsg: Message = {
         msgSend: sendUid,
         msgReceiver: receverUid,
@@ -39,7 +40,7 @@ export function UserMsg(sendUid: string, receverUid: string ,msg: string){
  * @param msg
  * @constructor
  */
-export function GroupMsg(sendUid: string, receverUid: string ,msg: string){
+export function GroupMsg(sendUid: number, receverUid: number ,msg: string){
     let GroupMsg: Message = {
         msgSend: sendUid,
         msgReceiver: receverUid,

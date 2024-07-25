@@ -1,11 +1,25 @@
 import request from "@/utils/request";
 import qs from 'query-string';
+import {messageType} from "element-plus";
 
 export interface Message {
-    msgSend : string
-    msgReceiver: string;
+    msgSend : number | string
+    msgReceiver: number;
     msgContent: string;
-    msgType:number
+    msgType:number,
+    chatId?:string
+}
+
+export interface MessageDetail {
+    id:string;
+    messageId:string;
+    sendId:number;
+    receiverId:number;
+    content:string;
+    createTime:string;
+    status:string;
+    sendNickname:string;
+    receiverNickname:string;
 }
 // export interface PersonMessage {
 //     sendUid : string
@@ -26,6 +40,6 @@ export function getMsgList(userId: string){
 }
 
 export function getMsgDetails(userId: string){
-    return request.get('/message/detail/'+userId)
+    return request.get<Map<number,MessageDetail[]>>('/message/detail/'+userId)
 }
 
