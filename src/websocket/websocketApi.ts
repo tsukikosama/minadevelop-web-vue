@@ -34,7 +34,7 @@ export function UserMsg(sendUid: number | string, receverUid: number ,msg: strin
 }
 
 /**
- * 反正成群消息
+ * 封装成群消息
  * @param sendUid
  * @param receverUid
  * @param msg
@@ -47,5 +47,10 @@ export function GroupMsg(sendUid: number, receverUid: number ,msg: string){
         msgContent: msg,
         msgType: 2
     }
+    return GroupMsg;
+}
+
+export function HeartMsg(){
+
     return GroupMsg;
 }

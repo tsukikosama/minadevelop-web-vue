@@ -3,8 +3,8 @@ import qs from 'query-string';
 import {messageType} from "element-plus";
 
 export interface Message {
-    msgSend : number | string
-    msgReceiver: number;
+    msgSend?: number | string
+    msgReceiver?: number;
     msgContent: string;
     msgType:number,
     chatId?:string
@@ -12,14 +12,17 @@ export interface Message {
 
 export interface MessageDetail {
     id:string;
+    ChatNickname:string;
+    ChatUid:number;
     messageId:string;
-    sendId:number;
-    receiverId:number;
+    sendUid:number;
+    receiverUid:number;
     content:string;
     createTime:string;
     status:string;
     sendNickname:string;
     receiverNickname:string;
+
 }
 // export interface PersonMessage {
 //     sendUid : string
@@ -41,5 +44,9 @@ export function getMsgList(userId: string){
 
 export function getMsgDetails(userId: string){
     return request.get<Map<number,MessageDetail[]>>('/message/detail/'+userId)
+}
+
+export function notifi(chatId: number){
+    return request.get('/message/notifi/'+chatId);
 }
 

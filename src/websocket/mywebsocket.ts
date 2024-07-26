@@ -2,14 +2,14 @@
 import {ref} from 'vue';
 import {Message} from "@/api/Message";
 import qs from "qs";
-import {GroupMsg} from "@/websocket/websocketApi";
+import {GroupMsg, HeartMsg} from "@/websocket/websocketApi";
 import {useRoute} from "vue-router";
 
 const ws = ref<WebSocket | null>(null);
 const heartbeatInterval = ref<number | null>(null);
 const heartbeatTimeout = ref<number | null>(null);
-const HEARTBEAT_INTERVAL: number = 5000; // 心跳间隔（毫秒）
-const HEARTBEAT_TIMEOUT: number = 10000; // 心跳超时（毫秒）
+const HEARTBEAT_INTERVAL: number = 1000 ; // 心跳间隔（毫秒）
+const HEARTBEAT_TIMEOUT: number = 10000 ; // 心跳超时（毫秒）
 
 export function useWebSocket() {
     // const  rt  = useRoute();
@@ -20,15 +20,13 @@ export function useWebSocket() {
         ws!.value = new WebSocket('ws://localhost:8099/websocket?userId='+uid);
         ws!.value.onopen = function () {
             console.log('开始连接');
-
-
-            let test: Message = {
-                msgSend: 1,
-                msgReceiver: 2,
-                msgContent: "3",
-                msgType: 3
-            }
-            ws.value!.send(JSON.stringify(test))
+            // let test: Message = {
+            //     msgSend: 1,
+            //     msgReceiver: 2,
+            //     msgContent: "3",
+            //     msgType: 3
+            // }
+            // ws.value!.send(JSON.stringify(test))
             startHeartbeat();
         };
 
@@ -37,6 +35,7 @@ export function useWebSocket() {
             console.log('接收到的消息是: ' + receivedMessage);
             if (receivedMessage === 'pong') {
                 console.log('Heartbeat received');
+                console.log("心跳检测完毕");
                 clearTimeout(heartbeatTimeout.value as number);
             }
 
@@ -44,7 +43,7 @@ export function useWebSocket() {
         };
 
         ws.value.onclose = function () {
-            console.log('Disconnected');
+            console.log('连接关闭');
             stopHeartbeat();
         };
 
@@ -56,14 +55,16 @@ export function useWebSocket() {
     }
 
     function startHeartbeat() {
-        // heartbeatInterval.value = setInterval(() => {
-        //     let s = GroupMsg("","",'ping');
-        //     ws.value!.send(JSON.stringify(s));
-        //     heartbeatTimeout.value = setTimeout(() => {
-        //         console.log('No heartbeat response, closing connection');
-        //         ws.value!.close();
-        //     }, HEARTBEAT_TIMEOUT);
-        // }, HEARTBEAT_INTERVAL);
+        console.log("心跳检测启动")
+        heartbeatInterval.value = setInterval(() => {
+            console.log("发送心跳检测")
+            let s = HeartMsg();
+            ws.value!.send(JSON.stringify(s));
+            heartbeatTimeout.value = setTimeout(() => {
+                console.log('没有心跳连接关闭');
+                ws.value!.close();
+            }, HEARTBEAT_TIMEOUT);
+        }, HEARTBEAT_INTERVAL);
     }
 
     function stopHeartbeat() {
