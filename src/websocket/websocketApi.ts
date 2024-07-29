@@ -23,12 +23,15 @@ export function SystemMsg(msg: string) {
  * @param msg
  * @constructor
  */
-export function UserMsg(sendUid: number | string, receverUid: number ,msg: string){
+export function UserMsg( sendUid: number | string, receverUid: number | string, msg: string,chatId?: number | string,sendNickname?:string ,receiverNickname?:string) {
     let UserMsg: Message = {
         msgSend: sendUid,
         msgReceiver: receverUid,
         msgContent: msg,
-        msgType: 1
+        msgType: 1,
+        chatId : chatId,
+        sendNickname: sendNickname,
+        receiverNickname: receiverNickname,
     }
     return UserMsg;
 }
@@ -40,7 +43,7 @@ export function UserMsg(sendUid: number | string, receverUid: number ,msg: strin
  * @param msg
  * @constructor
  */
-export function GroupMsg(sendUid: number, receverUid: number ,msg: string){
+export function GroupMsg(sendUid: number, receverUid: number, msg: string) {
     let GroupMsg: Message = {
         msgSend: sendUid,
         msgReceiver: receverUid,
@@ -50,7 +53,12 @@ export function GroupMsg(sendUid: number, receverUid: number ,msg: string){
     return GroupMsg;
 }
 
-export function HeartMsg(){
-
+export function HeartMsg(uid: number | string) {
+    let GroupMsg: Message = {
+        msgSend: uid,
+        msgReceiver: -1,
+        msgContent: "ping",
+        msgType: -99
+    }
     return GroupMsg;
 }

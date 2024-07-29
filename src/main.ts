@@ -22,7 +22,7 @@ app.use(ElementPlus)
 app.use(MakeitCaptcha)
 app.use(pinia)
 app.mount('#app')
-app.config.globalProperties.$bus = bus
+app.config.globalProperties.$mitt = bus
 app.config.globalProperties.$clearValue = function(obj:any){
     // console.log(obj)
     for(let key of Object.keys(obj)){

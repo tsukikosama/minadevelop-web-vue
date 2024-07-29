@@ -48,7 +48,7 @@ import "../common/tac.min.js"
 import "../common/styles/tac.css"
 import request from "@/utils/request";
 import {getCurrentInstance, reactive} from "vue";
-import {ElNotification, FormRules} from "element-plus";
+import {ElMessage, ElNotification, FormRules} from "element-plus";
 import {useUserStore} from "@/store";
 const globalProperties = getCurrentInstance()!.appContext.config.globalProperties;
 const clearValue = globalProperties.$clearValue;
@@ -102,19 +102,24 @@ const rules = reactive<FormRules>({
   }
 const login =  () => {
   request.post('/user/login/'+rememberme.isRememberme,userpo).then(async (res) => {
-    // ElNotification.success(res.data)
-    console.log(res);
-    //把token存入浏览器缓存中
-    //判断是否勾选了rememberme
-    let jsonstr = JSON.stringify(res.data);
+    // console.log('sadasdASA')
+    // console.log(res.data.tokenValue)
+    // console.log(res)
+    // 把token存入浏览器缓存中
+    // 判断是否勾选了rememberme
+    let token = res.data.tokenValue
     await request.get('/user/'+res.data.loginId).then((res) => {
-      userStatus.setToken(res.data.tokenValue)
-      console.log(res)
-      ElNotification.success("欢迎回来:"+res.data.nickname)
+      // console.log("开始输出")
+      // console.log(res)
+      // console.log(jsonstr)
+
+      ElMessage.success("欢迎回来:"+res.data.nickname)
       //把用户信息存入浏览器缓存中
+      // console.log(jsonstr)
       if(rememberme.isRememberme) {
-        localStorage.setItem('token',res.data.tokenValue);
-        localStorage.setItem("userInfo", jsonstr);
+        // JSON.stringify(res.data);
+        localStorage.setItem('token',token);
+        localStorage.setItem("userInfo", JSON.stringify(res.data));
       }
       userStatus.login(res.data)
       // globalProperties.$store.commit("savaUser",res.data)

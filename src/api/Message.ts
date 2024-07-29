@@ -3,11 +3,21 @@ import qs from 'query-string';
 import {messageType} from "element-plus";
 
 export interface Message {
-    msgSend?: number | string
-    msgReceiver?: number;
-    msgContent: string;
+    sendUid?: number | string
+    sendNickname?: string,
+    receiverNickname?: string,
+    receiverUid?: number | string;
+    Content: string;
     msgType:number,
-    chatId?:string
+    chatId?:string|number
+
+}
+
+export interface MessageBox {
+    chatId?:string,
+    chatNickname?:string,
+    chatUid:string | number,
+    list: MessageDetail[]
 }
 
 export interface MessageDetail {
@@ -22,7 +32,7 @@ export interface MessageDetail {
     status:string;
     sendNickname:string;
     receiverNickname:string;
-
+    chatId:string|number
 }
 // export interface PersonMessage {
 //     sendUid : string

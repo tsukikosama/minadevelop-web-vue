@@ -1,5 +1,5 @@
 // src/websocketService.js
-import {ref} from 'vue';
+import {ComponentInternalInstance, getCurrentInstance, ref} from 'vue';
 import {Message} from "@/api/Message";
 import qs from "qs";
 import {GroupMsg, HeartMsg} from "@/websocket/websocketApi";
@@ -8,38 +8,36 @@ import {useRoute} from "vue-router";
 const ws = ref<WebSocket | null>(null);
 const heartbeatInterval = ref<number | null>(null);
 const heartbeatTimeout = ref<number | null>(null);
-const HEARTBEAT_INTERVAL: number = 1000 ; // 心跳间隔（毫秒）
-const HEARTBEAT_TIMEOUT: number = 10000 ; // 心跳超时（毫秒）
+const HEARTBEAT_INTERVAL: number = 1000  * 30; // 心跳间隔（毫秒）
+const HEARTBEAT_TIMEOUT: number = 1000  * 10; // 心跳超时（毫秒）
 
 export function useWebSocket() {
     // const  rt  = useRoute();
 
-    // const messages:Message = ref<Message|null>(null);
+    const messages = ref<any[]>([]);
     // const uid = rt.query.uid as string
     function connect(uid:number|string) {
         ws!.value = new WebSocket('ws://localhost:8099/websocket?userId='+uid);
         ws!.value.onopen = function () {
             console.log('开始连接');
-            // let test: Message = {
-            //     msgSend: 1,
-            //     msgReceiver: 2,
-            //     msgContent: "3",
-            //     msgType: 3
-            // }
-            // ws.value!.send(JSON.stringify(test))
-            startHeartbeat();
+            startHeartbeat(uid);
         };
 
         ws.value.onmessage = function (event) {
-            const receivedMessage = event.data;
-            console.log('接收到的消息是: ' + receivedMessage);
+
+            let receivedMessage = event.data;
+
             if (receivedMessage === 'pong') {
-                console.log('Heartbeat received');
+                // console.log('Heartbeat received');
                 console.log("心跳检测完毕");
                 clearTimeout(heartbeatTimeout.value as number);
+            }else{
+                console.log(receivedMessage)
+                const msg = JSON.parse(receivedMessage);
+                //通过监听器来监听数据的变话
+                messages.value!.push(receivedMessage)
             }
 
-            // messages.value.push(receivedMessage);
         };
 
         ws.value.onclose = function () {
@@ -54,11 +52,12 @@ export function useWebSocket() {
 
     }
 
-    function startHeartbeat() {
+    function startHeartbeat(uid: string|number) {
         console.log("心跳检测启动")
         heartbeatInterval.value = setInterval(() => {
             console.log("发送心跳检测")
-            let s = HeartMsg();
+            let s = HeartMsg(uid);
+            console.log(s);
             ws.value!.send(JSON.stringify(s));
             heartbeatTimeout.value = setTimeout(() => {
                 console.log('没有心跳连接关闭');
@@ -73,7 +72,7 @@ export function useWebSocket() {
     }
 
     function sendMessage(message: Message) {
-        console.log("发送消息的方法接收到了message")
+        console.log("发送消息的方法接message")
         console.log(message);
         ws.value!.send(JSON.stringify(message));
     }
@@ -84,8 +83,8 @@ export function useWebSocket() {
     return {
         connect,
         sendMessage,
-        getWs
-        // messages
+        getWs,
+        messages
     };
 
 
