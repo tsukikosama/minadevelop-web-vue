@@ -39,23 +39,25 @@
       </el-span>
     </div>
     <div class="login" v-else>
-      <el-dropdown index="1" size="large" >
+      <el-dropdown index="1" size="large">
         <el-span>{{ userStore.user.nickname }}</el-span>
         <template #dropdown>
           <el-dropdown-menu split-button type="primary">
             <el-dropdown-item>Action 1</el-dropdown-item>
             <el-dropdown-item>
-              <el-badge :value="messageCount"  class="item" @click="toChat(userStore.user.userId)">
+              <el-badge :value="messageCount" class="item" @click="toChat(userStore.user.userId)">
                 <el-span>消息</el-span>
               </el-badge>
             </el-dropdown-item>
-            <el-dropdown-item>Action 3</el-dropdown-item>
-            <el-dropdown-item>Action 4</el-dropdown-item>
+            <el-dropdown-item @click="toFuns(userStore.user.userId)">
+              <el-span>粉丝</el-span>
+            </el-dropdown-item>
+            <el-dropdown-item @click="toFollow(userStore.user.userId)">
+              <el-span>关注</el-span>
+            </el-dropdown-item>
             <el-dropdown-item>Action 5</el-dropdown-item>
-
           </el-dropdown-menu>
         </template>
-
       </el-dropdown>
       <el-span index="4" class="logout" @click="logout()">
         注销
@@ -83,15 +85,17 @@ const messageCount = ref<number>(0)
 const login = () => {
   //跳转登录界面
   globalProperties.$router.push({path: '/login'})
-  // request.get('/login').then(() => {
-  //   ElNotification.success("登录成功")
-  // }).catch((e: string) => {
-  //   ElNotification.error("登录失败，原因为："+e)
-  // })
 }
 const toChat = (uid: string) => {
   // console.log(u)
   globalProperties.$router.push({path: '/chat', query: {uid: uid}})
+}
+const toFuns = (uid: string) => {
+  globalProperties.$router.push({path: '/fans', query: {uid: uid}})
+}
+
+const toFollow = (uid: string) => {
+  globalProperties.$router.push({path: '/follow', query: {uid: uid}})
 }
 const reg = () => {
   // request.get('/reg').then(() => {
@@ -104,8 +108,8 @@ onMounted(() => {
   msgCount()
 })
 const msgCount = async () => {
-  if (userStore.user!= null){
-    let { data } = await getMsgList(userStore.user.userId);
+  if (userStore.user != null) {
+    let {data} = await getMsgList(userStore.user.userId);
     // console.log("wwwwlogo")
     console.log(data);
     messageCount.value = data;
@@ -147,6 +151,7 @@ const handleSelect = (key: string, keyPath: string[]) => {
 .login el-span:hover {
   cursor: pointer
 }
+
 .search {
   margin: auto 5px;
 }

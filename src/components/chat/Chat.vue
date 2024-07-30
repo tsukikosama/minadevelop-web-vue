@@ -23,7 +23,7 @@
           <el-divider/>
           <div class="chat_box" :class="item.receiverUid != msgSend ? 'chat_send':'chat_receiver'"
                v-for="(item,index) in chatBox.list" :key="index">
-            <el-image></el-image>
+<!--            <el-image></el-image>-->
             {{ item.content }}<br/>
           </div>
         </div>

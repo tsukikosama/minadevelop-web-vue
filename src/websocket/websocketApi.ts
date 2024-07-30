@@ -9,7 +9,7 @@ export function SystemMsg(msg: string) {
     let SystemMsg: Message = {
         msgSend: -1,
         msgReceiver: -1,
-        msgContent: msg,
+        content: msg,
         msgType: 3,
 
     }
@@ -27,7 +27,7 @@ export function UserMsg( sendUid: number | string, receverUid: number | string, 
     let UserMsg: Message = {
         msgSend: sendUid,
         msgReceiver: receverUid,
-        msgContent: msg,
+        content: msg,
         msgType: 1,
         chatId : chatId,
         sendNickname: sendNickname,
@@ -47,7 +47,7 @@ export function GroupMsg(sendUid: number, receverUid: number, msg: string) {
     let GroupMsg: Message = {
         msgSend: sendUid,
         msgReceiver: receverUid,
-        msgContent: msg,
+        content: msg,
         msgType: 2
     }
     return GroupMsg;
@@ -57,7 +57,7 @@ export function HeartMsg(uid: number | string) {
     let GroupMsg: Message = {
         msgSend: uid,
         msgReceiver: -1,
-        msgContent: "ping",
+        content: "ping",
         msgType: -99
     }
     return GroupMsg;

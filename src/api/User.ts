@@ -3,7 +3,7 @@ import request from "@/utils/request";
 import qs from "query-string";
 
 export interface User {
-    userId : string
+    userId : string | number
     nickname: string;
     email: string;
     avatar : string;

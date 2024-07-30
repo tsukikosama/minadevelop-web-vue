@@ -21,13 +21,26 @@ const routes: Array<RouteRecordRaw> = [
         // which is lazy-loaded when the route is visited.
         component: () => import(/* webpackChunkName: "about" */ '../page/ProductPage.vue')
       },
+
       {
 
         path:'/types',
         name:'分类',
         component:() => import('../page/TypePage.vue')
       },
-
+      {
+        path:'/chat',
+        name:'聊天',
+        component:() => import('../page/ChatPage.vue')
+      },
+      {
+        path: '/follow',
+        name: '关注',
+        // route level code-splitting
+        // this generates a separate chunk (about.[hash].js) for this route
+        // which is lazy-loaded when the route is visited.
+        component: () => import(/* webpackChunkName: "about" */ '../page/FollowPage.vue')
+      },
     ]
   },
   {
@@ -43,11 +56,7 @@ const routes: Array<RouteRecordRaw> = [
     name:'注册',
     component:() => import('../page/RegPage.vue')
   },
-  {
-    path:'/chat',
-    name:'聊天',
-    component:() => import('../page/ChatPage.vue')
-  }
+
 
 ]
 

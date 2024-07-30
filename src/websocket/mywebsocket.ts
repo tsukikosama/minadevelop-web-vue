@@ -8,8 +8,8 @@ import {useRoute} from "vue-router";
 const ws = ref<WebSocket | null>(null);
 const heartbeatInterval = ref<number | null>(null);
 const heartbeatTimeout = ref<number | null>(null);
-const HEARTBEAT_INTERVAL: number = 1000  * 30; // 心跳间隔（毫秒）
-const HEARTBEAT_TIMEOUT: number = 1000  * 10; // 心跳超时（毫秒）
+const HEARTBEAT_INTERVAL: number = 1000 * 30 ; // 心跳间隔（毫秒）
+const HEARTBEAT_TIMEOUT: number = 1000 * 10; // 心跳超时（毫秒）
 
 export function useWebSocket() {
     // const  rt  = useRoute();
@@ -26,16 +26,15 @@ export function useWebSocket() {
         ws.value.onmessage = function (event) {
 
             let receivedMessage = event.data;
+            const msg = JSON.parse(receivedMessage);
 
-            if (receivedMessage === 'pong') {
+            if (msg.content === 'pong') {
                 // console.log('Heartbeat received');
                 console.log("心跳检测完毕");
                 clearTimeout(heartbeatTimeout.value as number);
             }else{
-                console.log(receivedMessage)
-                const msg = JSON.parse(receivedMessage);
                 //通过监听器来监听数据的变话
-                messages.value!.push(receivedMessage)
+                messages.value!.push(msg)
             }
 
         };
