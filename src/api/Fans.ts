@@ -9,6 +9,8 @@ export interface Fans {
     avatar: string;
     followNickname: string,
     followAvatar: string;
+    isFollow: number,
+    isBackFollow:number
 }
 export interface FollowEntity{
     userId: number,
@@ -19,8 +21,14 @@ export function getFans(Uid: number){
     return request.get<Fans[]>('/fans/fansList/'+Uid)
 }
 
-export function follow(follow:FollowEntity){
-    return request.post('/fans/follow/',{
-        param: follow
-    })
+export function getFollows(Uid: number){
+    return request.get<Fans[]>('/fans/followList/'+Uid)
+}
+export function followUserByUid(follow:FollowEntity){
+    return request.post('/fans/follow', follow
+    )
+}
+
+export function notFollowUserByUid(follow: FollowEntity){
+    return request.post('/fans/notFollow', follow)
 }

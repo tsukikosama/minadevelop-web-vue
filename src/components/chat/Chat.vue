@@ -17,24 +17,30 @@
 
         </div>
       </div>
-      <div class="chat_right " v-show="chatBox != 0">
+      <div class="chat_right" >
         <div class="chatbox">
-          <span v-if="chatBox.chatNickname">{{ chatBox.chatNickname }}</span>
-          <el-divider/>
+          <span v-if="chatBox.chatNickname" >{{ chatBox.chatNickname }}</span>
+
           <div class="chat_box" :class="item.receiverUid != msgSend ? 'chat_send':'chat_receiver'"
                v-for="(item,index) in chatBox.list" :key="index">
 <!--            <el-image></el-image>-->
             {{ item.content }}<br/>
           </div>
         </div>
+        <div class="chat_inner">
+          <el-input v-model="msgContent" placeholder="请输入内容"   type="textarea" :autosize="{ minRows: 4, maxRows: 4 }">
+
+          </el-input>
+          <el-button @click="send()" class="sendbtn">发送</el-button>
+        </div>
       </div>
     </div>
   </div>
 
 
-  <el-input v-model="msgContent">
-  </el-input>
-  <el-button @click="send()">发送</el-button>
+<!--  <el-input v-model="msgContent">-->
+<!--  </el-input>-->
+
 </template>
 
 <script setup lang="ts">
@@ -53,7 +59,7 @@ import {useUserStore} from "@/store";
 const rt = useRoute();
 const userStore = useUserStore()
 const msgReceiver = ref<number>(-1);
-const msgContent = ref<string>('');
+const msgContent = ref<string>("");
 const msgSend = rt.query.uid as string
 const chatBox = ref<MessageBox[]>([]);
 const chatContact = ref<MessageDetail[]>([]);
@@ -62,8 +68,8 @@ const {connect, sendMessage, messages} = useWebSocket();
 const userList = ref<User[]>([])
 //获取全部的用户对象
 onMounted(async () => {
-  const {data} = await getUserList();
-  userList.value = data;
+  // const {data} = await getUserList();
+  // userList.value = data;
 })
 onMounted(() => {
   connect(msgSend);
@@ -145,13 +151,25 @@ watch(chatBox,(newVal:any) => {
 <style scoped>
 .chat {
   display: flex;
+
 //width:500px; flex-direction: column; //height: 500px; //background: #409eff;
 }
+.chat div{
 
+}
 .chat_left {
   width: 500px;
+  height: 500px;
+  border: 1px solid black;
 }
-
+.chat_right{
+  border: 1px solid black ;
+}
+.chat_box span{
+  height: 30px;
+  background-color: #39c522;
+  border-bottom: 1px solid black;
+}
 .infinite-list-wrapper {
   height: 500px;
   text-align: center;
@@ -184,12 +202,13 @@ watch(chatBox,(newVal:any) => {
 
 .chat_right span {
 //font-size: 24px;
+
 }
 
 .chatbox {
-  height: 100%;
+  height: 410px;
   width: 500px;
-  background-color: #ff5d39;
+  overflow-y: scroll;
 }
 
 .chat_box {
@@ -205,5 +224,16 @@ watch(chatBox,(newVal:any) => {
 .chat_send {
   background-color: #027aa1;
   flex-direction: row-reverse;
+}
+.chat_inner{
+  display: flex;
+  //width: 100%;
+  //height: 200px;
+  position: relative;
+}
+.sendbtn{
+  position: absolute;
+  right: 0px;
+  bottom: 0px;
 }
 </style>

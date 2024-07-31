@@ -1,6 +1,7 @@
 <template>
   <div>
-    <UserItem :type=1>
+    up:
+    <UserItem :type=2>
 
     </UserItem>
   </div>

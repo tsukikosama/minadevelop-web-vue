@@ -4,26 +4,39 @@
     <li v-for="(item,index) in followList" :key="index">
       <div class="item">
         <div class="item_left">
-          <el-avatar :size="'large'"></el-avatar>
+          <el-popover
+              placement="top-start"
+              :width="200"
+              trigger="hover"
+          >
+            <el-span>{{item.followNickname}}</el-span>
+            <el-button>关注</el-button>
+            <el-button @click="sendMsg()">私信</el-button>
+            <template #reference>
+              <el-avatar :size="'large'"></el-avatar>
+            </template>
+          </el-popover>
+
         </div>
         <div class="item_center">
-            <div>
-              {{item.followNickname}}
-            </div>
-            <div>
-              这个人很懒什么都没留下.
-            </div>
+          <div>
+            {{ item.followNickname }}
+          </div>
+          <div>
+            这个人很懒什么都没留下.
+          </div>
         </div>
         <div class="item_right">
-            <div>
-              <el-button @click="followToUser(item.userId)">
-                关注
-              </el-button>
-              <el-button>
-                取消关注
-              </el-button>
+          <div>
+<!--            v-bind:type="item.isBackFollow == 1 ? 'success' : 'danger'"-->
+            <el-button @click="followToUser(item)" v-bind:type="item.isBackFollow == 1 ? 'success' : 'danger'">
+              关注
+            </el-button>
+<!--            <el-button @click=notFollow(item)>-->
+<!--              取消关注-->
+<!--            </el-button>-->
 
-            </div>
+          </div>
         </div>
       </div>
     </li>
@@ -34,7 +47,7 @@
 
 import follow from "@/components/follow/Follow.vue";
 import {onMounted, ref} from "vue";
-import {Fans, Follow, FollowEntity, getFans} from "@/api/Fans";
+import {Fans, FollowEntity, followUserByUid, getFans, getFollows, notFollowUserByUid} from "@/api/Fans";
 import {useUserStore} from "@/store";
 import {ElMessage} from "element-plus";
 import Item from "@/components/Item.vue";
@@ -49,26 +62,49 @@ const props = defineProps(
 )
 const followList = ref<Fans[]>([]);
 const userStatus = useUserStore();
-const followUser = ref<FollowEntity>();
+const followUser = ref<FollowEntity>({
+  followUserId: -1,
+  userId: -1,
+  isFollow: -1
+});
 onMounted(async () => {
-  if (props.type == 1){
+  console.log("type:",props.type)
+  if (props.type == 1) {
     //fans
     if (userStatus.user!.userId) {
       const {data} = await getFans(userStatus.user!.userId as number)
       followList.value = data.records
-      // followUser.value?.userId = userStatus.user!.userId as number
+      followUser.value!.userId = userStatus.user!.userId as number
     } else {
       ElMessage.error("用户未登录")
     }
-  }else{
+  } else {
     //follow
+    if (userStatus.user!.userId) {
+      const {data} = await getFollows(userStatus.user!.userId as number)
+      followList.value = data.records
+      followUser.value!.userId = userStatus.user!.userId as number
+    } else {
+      ElMessage.error("用户未登录")
+    }
   }
 
 })
 
-const followToUser = async (uid : number) => {
-  // followUser.value?.followUserId = uid as number;
-  //   await follow();
+const followToUser = async (user: Fans) => {
+  user.isBackFollow = user.isBackFollow^1
+  followUser.value!.followUserId = user.followUserId;
+  followUser.value.isFollow = followUser.value.isFollow^1;
+  // followUser.value!.isFollow = user;
+  await followUserByUid(followUser.value!);
+  if (user.followUserId == 1 ){
+    ElMessage.success("关注成功")
+  }else{
+    ElMessage.success("取消关注成功")
+  }
+}
+const sendMsg = async () => {
+
 }
 </script>
 
@@ -77,25 +113,30 @@ const followToUser = async (uid : number) => {
   list-style: none;
   height: 100px;
 }
-.user_item li{
+
+.user_item li {
   width: 80vw;
   height: 100px;
 }
-.item{
+
+.item {
   display: flex;
   padding: 5px;
   align-items: center;
   height: 100px;
 }
-.item_left{
+
+.item_left {
   width: 10vw;
   background-color: #39c522;
 }
-.item_right{
+
+.item_right {
   width: 10vw;
   background-color: #00f4ab;
 }
-.item_center{
+
+.item_center {
   width: 60vw;
   background-color: #409eff;
 }

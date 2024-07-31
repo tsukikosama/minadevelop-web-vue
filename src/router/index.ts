@@ -34,6 +34,14 @@ const routes: Array<RouteRecordRaw> = [
         component:() => import('../page/ChatPage.vue')
       },
       {
+        path: '/fans',
+        name: '粉丝',
+        // route level code-splitting
+        // this generates a separate chunk (about.[hash].js) for this route
+        // which is lazy-loaded when the route is visited.
+        component: () => import(/* webpackChunkName: "about" */ '../page/FansPage.vue')
+      },
+      {
         path: '/follow',
         name: '关注',
         // route level code-splitting

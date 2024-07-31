@@ -1,6 +1,7 @@
 <template>
   <div>
-    <UserItem :type=2>
+    funs:
+    <UserItem :type=1>
 
     </UserItem>
   </div>
