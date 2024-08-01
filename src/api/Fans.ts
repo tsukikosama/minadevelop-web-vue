@@ -2,13 +2,13 @@ import request from "@/utils/request";
 import qs from "query-string";
 
 export interface Fans {
-    userId: number,
-    followUserId: number,
+    userId: number | string,
+    // followUserId: number,
     createTime: string;
     nickname: string;
     avatar: string;
-    followNickname: string,
-    followAvatar: string;
+    // followNickname: string,
+    // followAvatar: string;
     isFollow: number,
     isBackFollow:number
 }

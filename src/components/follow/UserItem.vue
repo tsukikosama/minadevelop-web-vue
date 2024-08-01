@@ -9,9 +9,9 @@
               :width="200"
               trigger="hover"
           >
-            <el-span>{{item.followNickname}}</el-span>
+            <el-span>{{item.nickname}}</el-span>
             <el-button>关注</el-button>
-            <el-button @click="sendMsg()">私信</el-button>
+            <el-button @click="sendMsg(item)">私信</el-button>
             <template #reference>
               <el-avatar :size="'large'"></el-avatar>
             </template>
@@ -20,7 +20,7 @@
         </div>
         <div class="item_center">
           <div>
-            {{ item.followNickname }}
+            {{ item.nickname }}
           </div>
           <div>
             这个人很懒什么都没留下.
@@ -46,11 +46,13 @@
 <script setup lang="ts">
 
 import follow from "@/components/follow/Follow.vue";
-import {onMounted, ref} from "vue";
+import {onMounted, ref,getCurrentInstance} from "vue";
 import {Fans, FollowEntity, followUserByUid, getFans, getFollows, notFollowUserByUid} from "@/api/Fans";
 import {useUserStore} from "@/store";
 import {ElMessage} from "element-plus";
 import Item from "@/components/Item.vue";
+import {ChatRelationForm, createChatRelation} from "@/api/Chat";
+
 
 const props = defineProps(
     {
@@ -67,8 +69,13 @@ const followUser = ref<FollowEntity>({
   userId: -1,
   isFollow: -1
 });
+const relationForm = ref<ChatRelationForm>({
+  sendUid: "",
+  receiverUid: "",
+})
+const globalProperties = getCurrentInstance()!.appContext.config.globalProperties;
 onMounted(async () => {
-  console.log("type:",props.type)
+  // console.log("type:",props.type)
   if (props.type == 1) {
     //fans
     if (userStatus.user!.userId) {
@@ -93,18 +100,31 @@ onMounted(async () => {
 
 const followToUser = async (user: Fans) => {
   user.isBackFollow = user.isBackFollow^1
-  followUser.value!.followUserId = user.followUserId;
-  followUser.value.isFollow = followUser.value.isFollow^1;
+  followUser.value!.followUserId = user.userId as number;
+  followUser.value.isFollow = user.isFollow^1;
   // followUser.value!.isFollow = user;
   await followUserByUid(followUser.value!);
-  if (user.followUserId == 1 ){
+  if (user.isBackFollow == 1 ){
     ElMessage.success("关注成功")
   }else{
     ElMessage.success("取消关注成功")
   }
 }
-const sendMsg = async () => {
-
+const sendMsg = async (uid:Fans) => {
+  // console.log(uid)
+  if (userStatus.user!.userId) {
+    relationForm.value!.receiverUid = uid.userId as string;
+    relationForm.value!.sendUid = userStatus.user!.userId as string
+    const {data} = await createChatRelation(relationForm.value);
+    // console.log("data",data);
+    globalProperties.$router.push({path: '/chat', query: {
+        chatId: data,
+        // chatUser:JSON.stringify(uid)
+    }
+    })
+  } else {
+    ElMessage.error("用户未登录")
+  }
 }
 </script>
 
