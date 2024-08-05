@@ -65,8 +65,8 @@ const props = defineProps(
 const followList = ref<Fans[]>([]);
 const userStatus = useUserStore();
 const followUser = ref<FollowEntity>({
-  followUserId: -1,
-  userId: -1,
+  followUserId: "-1",
+  userId: "-1",
   isFollow: -1
 });
 const relationForm = ref<ChatRelationForm>({
@@ -81,7 +81,7 @@ onMounted(async () => {
     if (userStatus.user!.userId) {
       const {data} = await getFans(userStatus.user!.userId as number)
       followList.value = data.records
-      followUser.value!.userId = userStatus.user!.userId as number
+      followUser.value!.userId = userStatus.user!.userId as string
     } else {
       ElMessage.error("用户未登录")
     }
@@ -90,7 +90,7 @@ onMounted(async () => {
     if (userStatus.user!.userId) {
       const {data} = await getFollows(userStatus.user!.userId as number)
       followList.value = data.records
-      followUser.value!.userId = userStatus.user!.userId as number
+      followUser.value!.userId = userStatus.user!.userId as string
     } else {
       ElMessage.error("用户未登录")
     }
@@ -100,7 +100,7 @@ onMounted(async () => {
 
 const followToUser = async (user: Fans) => {
   user.isBackFollow = user.isBackFollow^1
-  followUser.value!.followUserId = user.userId as number;
+  followUser.value!.followUserId = user.userId;
   followUser.value.isFollow = user.isFollow^1;
   // followUser.value!.isFollow = user;
   await followUserByUid(followUser.value!);

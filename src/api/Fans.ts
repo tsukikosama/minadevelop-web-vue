@@ -2,19 +2,16 @@ import request from "@/utils/request";
 import qs from "query-string";
 
 export interface Fans {
-    userId: number | string,
-    // followUserId: number,
+    userId: string | string,
     createTime: string;
     nickname: string;
     avatar: string;
-    // followNickname: string,
-    // followAvatar: string;
     isFollow: number,
     isBackFollow:number
 }
 export interface FollowEntity{
-    userId: number,
-    followUserId: number,
+    userId: string,
+    followUserId: string,
     isFollow: number,
 }
 export function getFans(Uid: number){

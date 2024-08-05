@@ -9,14 +9,14 @@ const ws = ref<WebSocket | null>(null);
 const heartbeatInterval = ref<number | null>(null);
 const heartbeatTimeout = ref<number | null>(null);
 const HEARTBEAT_INTERVAL: number = 1000 * 30 ; // 心跳间隔（毫秒）
-const HEARTBEAT_TIMEOUT: number = 1000 * 10; // 心跳超时（毫秒）
+const HEARTBEAT_TIMEOUT: number = 1000 * 50; // 心跳超时（毫秒）
 
 export function useWebSocket() {
     // const  rt  = useRoute();
 
     const messages = ref<any[]>([]);
     // const uid = rt.query.uid as string
-    function connect(uid:number|string) {
+    function connect(uid:string) {
         ws!.value = new WebSocket('ws://localhost:8099/websocket?userId='+uid);
         ws!.value.onopen = function () {
             console.log('开始连接');
@@ -24,13 +24,12 @@ export function useWebSocket() {
         };
 
         ws.value.onmessage = function (event) {
-
+            // console.log(event,"接收到了心跳")
             let receivedMessage = event.data;
             const msg = JSON.parse(receivedMessage);
-
             if (msg.content === 'pong') {
                 // console.log('Heartbeat received');
-                console.log("心跳检测完毕");
+                // console.log("心跳检测完毕");
                 clearTimeout(heartbeatTimeout.value as number);
             }else{
                 //通过监听器来监听数据的变话
@@ -51,10 +50,10 @@ export function useWebSocket() {
 
     }
 
-    function startHeartbeat(uid: string|number) {
-        console.log("心跳检测启动")
+    function startHeartbeat(uid: string) {
+        // console.log("心跳检测启动")
         heartbeatInterval.value = setInterval(() => {
-            console.log("发送心跳检测")
+            // console.log("发送心跳检测")
             let s = HeartMsg(uid);
             console.log(s);
             ws.value!.send(JSON.stringify(s));
@@ -71,8 +70,6 @@ export function useWebSocket() {
     }
 
     function sendMessage(message: Message) {
-        console.log("发送消息的方法接message")
-        console.log(message);
         ws.value!.send(JSON.stringify(message));
     }
 

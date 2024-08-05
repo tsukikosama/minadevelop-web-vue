@@ -7,8 +7,8 @@ import {Message} from "@/api/Message";
  */
 export function SystemMsg(msg: string) {
     let SystemMsg: Message = {
-        msgSend: -1,
-        msgReceiver: -1,
+        msgSend: "",
+        msgReceiver: "",
         content: msg,
         msgType: 3,
 
@@ -23,15 +23,14 @@ export function SystemMsg(msg: string) {
  * @param msg
  * @constructor
  */
-export function UserMsg( sendUid: number | string, receverUid: number | string, msg: string,chatId?: number | string,sendNickname?:string ,receiverNickname?:string) {
+export function UserMsg( sendUid:  string, receverUid: string, msg: string,chatId?:string|undefined) {
     let UserMsg: Message = {
         msgSend: sendUid,
         msgReceiver: receverUid,
         content: msg,
         msgType: 1,
         chatId : chatId,
-        sendNickname: sendNickname,
-        receiverNickname: receiverNickname,
+
     }
     return UserMsg;
 }
@@ -43,7 +42,7 @@ export function UserMsg( sendUid: number | string, receverUid: number | string, 
  * @param msg
  * @constructor
  */
-export function GroupMsg(sendUid: number, receverUid: number, msg: string) {
+export function GroupMsg(sendUid: string, receverUid: string, msg: string) {
     let GroupMsg: Message = {
         msgSend: sendUid,
         msgReceiver: receverUid,
@@ -53,10 +52,10 @@ export function GroupMsg(sendUid: number, receverUid: number, msg: string) {
     return GroupMsg;
 }
 
-export function HeartMsg(uid: number | string) {
+export function HeartMsg(uid: string) {
     let GroupMsg: Message = {
         msgSend: uid,
-        msgReceiver: -1,
+        msgReceiver: "-1",
         content: "ping",
         msgType: -99
     }

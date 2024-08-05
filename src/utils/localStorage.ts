@@ -8,9 +8,8 @@ export function getLocalStorage(key:string){
 }
 
 export function setLocalStorage(key: string, value:any){
-    console.log("缓存成功")
-    console.log("key" + key)
-    console.log("value" + value)
     let date = JSON.stringify(value);
     localStorage.setItem(key, date);
 }
+
+

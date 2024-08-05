@@ -19,9 +19,9 @@
       </div>
       <div class="chat_right">
         <div class="chatbox">
-          <span v-if="chatBox.nickname">{{ chatBox.nickname }}</span>
+          <span v-if="chatBox.nickname != null">{{ chatBox.nickname }}</span>
 
-          <div class="chat_box" :class="item.receiverUid != msgSend ? 'chat_send':'chat_receiver'"
+          <div class="chat_box" :class="item.receiverUid != userStore.user!.userId ? 'chat_send':'chat_receiver'"
                v-for="(item,index) in chatBox.list" :key="index">
             <!--            <el-image></el-image>-->
             {{ item.content }}<br/>
@@ -38,84 +38,90 @@
     </div>
   </div>
 
-
-  <!--  <el-input v-model="msgContent">-->
-  <!--  </el-input>-->
-
 </template>
 
 <script setup lang="ts">
 
-import {ComponentInternalInstance, computed, getCurrentInstance, onMounted, Ref, ref, watch} from 'vue'
-import {getUserList, User} from "@/api/User";
-import {getMsgDetails, Message, MessageBox, MessageDetail, notifi, sendMsg} from "@/api/Message";
+import { onMounted, ref, watch} from 'vue'
+import {User} from "@/api/User";
+import {Message, MessageBox, MessageDetail, notifi} from "@/api/Message";
 import {useRoute} from "vue-router";
 import {useWebSocket} from "@/websocket/mywebsocket";
 import {UserMsg} from "@/websocket/websocketApi";
-import {getChatRelationByChatId, getChatRelationByUid} from "@/api/Chat";
+import {ChatRelation, getAllChatRelation, getChatRelationByChatId} from "@/api/Chat";
 import {getLocalStorage, setLocalStorage} from "@/utils/localStorage";
-import {clearObject} from "@/utils/commonUtils";
 import {useUserStore} from "@/store";
-
+import {ElMessage} from "element-plus";
 const rt = useRoute();
 const userStore = useUserStore()
-const msgReceiver = ref<number>(-1);
+const msgReceiver = ref<string>("");
 const msgContent = ref<string>("");
-const msgSend = ref<string>("")
 const chatBox = ref<MessageBox[]>([]);
-const chatContact = ref<MessageDetail[]>([]);
-const {connect, sendMessage, messages} = useWebSocket();
+const chatContact = ref<ChatRelation[]>([]);
+const {connect, messages} = useWebSocket();
 
-const userList = ref<User[]>([])
-//获取全部的用户对象
-onMounted( () => {
-  // const {data} = await getUserList();
-  // userList.value = data;
+const checkClient = ref({
+  checkId:"",
+  checkChatId:"",
 })
+
+//获取全部的用户对象
 onMounted(async () => {
-  msgSend.value = userStore.user!.userId as string;
-  connect(msgSend.value);
-  console.log("chatId",rt.query.chatId)
-  //判断缓存中是否拥有这个
+  // console.log("async",userStore.user!.userId)
+  //获取当前用户的全部聊天关系
+  let { data }  = await getAllChatRelation(userStore.user!.userId as string);
+
+  //获取全部的关系集合
+  let arr:string[] = data;
+  console.log(arr + "arrr")
+  for (let i = 0; i < arr.length; i++){
+
+    //遍历本地缓存是否拥有该聊天记录
+     let item = localStorage.getItem(arr[i]);
+     console.log("item",item)
+     if (item != null){
+       // console.log("json",JSON.parse(item))
+       let chat =  JSON.parse(item);
+       chatContact.value!.push(chat)
+     }
+  }
+
+  connect(userStore.user!.userId as string);
+  // console.log("chatId",rt.query.chatId)
+  //判断缓存中是否拥有这个 如果这个聊天对象 把这个聊天对象添加到chatbox的头部
   const chat = localStorage.getItem(rt.query.chatId as string)
-  console.log("当前的chat",chat)
-  let data ;
-  if (chat != null){
-    data = JSON.parse(chat)
-    console.log("BUWEIkong",)
+  // console.log("当前的chat",chat)
+
+  if (chat != null && userStore.user!.userId as string!= null){
+    let data = JSON.parse(chat)
+    // console.log("BUWEIkong",data)
+    // console.log("chatbox",chatBox)
+    chatBox.value  = data
   }else{
     //为空发送一个请求去后台获取该聊天关系 然后存入聊天框
-      data  = await getChatRelationByChatId(rt.query.chatId as string);
-    console.log("weikong",data.data)
-
-  }
-  chatContact.value.push(data.data);
-})
-onMounted(async () => {
-  console.log("async",msgSend.value)
-  if (msgSend.value != null) {
-    const {data} = await getChatRelationByUid(msgSend.value);
-    console.log("data",data)
-    chatContact.value = data
+      const {data}  = await getChatRelationByChatId(rt.query.chatId as string);
+      // console.log("weikong",data)
+      chatContact.value!.push(data);
+      // console.log("chatcontact",chatContact)
   }
 
 })
-
-
 function send() {
-  let msg = UserMsg(msgSend.value, msgReceiver.value, msgContent.value, chatBox.value.chatId, userStore.user!.nickname, chatBox.value.chatNickname);
+  let msg = UserMsg(userStore.user!.userId as string, checkClient.value.checkId, msgContent.value,
+      checkClient.value.checkChatId);
   useWebSocket().sendMessage(msg);
-  msgContent.value = "";
+  console.log("test",msg);
   //并且把当前的消息存入list集合中并且存入缓存
-  chatBox.value.list!.push(msg);
+  chatBox.value.push(msg);
+  msgContent.value = "";
+
 }
 
 /**
  * 监听message中的数据变话  这边需要加value要不然不会监听到
  */
-watch(messages.value, (newMessages: any) => {
+watch(chatBox.value, (newMessages: any) => {
   // 将新消息添加到当前聊天框中
-  console.log("接收到了新的数据:")
   console.log(newMessages)
   //转成对象
   const data = JSON.parse(newMessages);
@@ -123,7 +129,7 @@ watch(messages.value, (newMessages: any) => {
   //获取到了新的消息把他添加到list集合中并且更新缓存中的消息
   //获取当前的chatbox 存入list中
   if (chatBox.value != null) {
-    chatBox.value.list!.push(data)
+    chatBox.value.push(data)
   }
   // if (chatBox.value && chatBox.value.chatId) {
   //   chatBox.value.list.push(...newMessages);
@@ -134,26 +140,29 @@ watch(messages.value, (newMessages: any) => {
  * 切换聊天用户
  * @param str
  */
-const changeBox = (str: any) => {
+const changeBox = (str: Message) =>{
+    console.log(str + "sssssssss")
+  checkClient.value.checkChatId = str.chatId!
+  // checkClient.value.checkId = str.receiverUid
   //改变接收用户
-  // console.log(str.chatUid)
-  msgReceiver.value = str.chatUid
+  console.log("ssssss",str)
+  checkClient.value.checkId = str.uid!
   //判断chatbox是否为空 如果不为空就代表 用户切换了聊天框 先把旧的聊天信息存入缓存中
   if (chatBox.value != null) {
-    setLocalStorage(chatBox.value.chatId, chatBox.value);
+    setLocalStorage(checkClient.value.checkChatId, chatBox.value);
   }
   //先从浏览器缓存中查询是否有缓存的聊天记录
-  let date = getLocalStorage(str.chatId);
+  let date = getLocalStorage(str.chatId!);
 
   //然后再把查询到的消息添加进chatbox
   if (date == null) {
-    chatBox.value = str
+    chatBox.value.push(str)
   } else {
     chatBox.value = date
-    chatBox.value.messageList.push(...str.list)
+    chatBox.value.push(...str)
   }
-  console.log(str)
-  msgReceiver.value = str.chatUid;
+  // console.log(str)
+  // msgReceiver.value = str.chatUid;
   //发送一个异步请求告知后台读取过了这个消息
   notifi(str.chatId)
 }
@@ -165,7 +174,7 @@ const changeBox = (str: any) => {
 watch(chatBox, (newVal: any) => {
   // console.log("s数量发送了变话")
   // console.log(newVal.chatId)
-  setLocalStorage(newVal.chatId, newVal)
+  setLocalStorage(newVal.id, newVal)
   // setLocalStorage()
 }, {deep: true})
 </script>
