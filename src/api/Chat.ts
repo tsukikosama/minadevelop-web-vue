@@ -10,7 +10,9 @@ export interface ChatRelationForm{
 export interface ChatRelation{
     nickname: string,
     avatar: string,
-    uid: string
+    uid: string,
+    chatId:string,
+    unread?:number
 }
 
 export function createChatRelation(relation:ChatRelationForm){

@@ -54,6 +54,7 @@ export function useWebSocket() {
         // console.log("心跳检测启动")
         heartbeatInterval.value = setInterval(() => {
             // console.log("发送心跳检测")
+
             let s = HeartMsg(uid);
             console.log(s);
             ws.value!.send(JSON.stringify(s));

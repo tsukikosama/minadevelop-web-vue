@@ -5,10 +5,11 @@ import {Message} from "@/api/Message";
  * @param msg
  * @constructor
  */
-export function SystemMsg(msg: string) {
+export function SystemMsg(uid:string,msg: string,nickname: string,avatar: string) {
     let SystemMsg: Message = {
-        msgSend: "",
-        msgReceiver: "",
+        uid: uid,
+        nickname:nickname,
+        avatar:avatar,
         content: msg,
         msgType: 3,
 
@@ -23,10 +24,11 @@ export function SystemMsg(msg: string) {
  * @param msg
  * @constructor
  */
-export function UserMsg( sendUid:  string, receverUid: string, msg: string,chatId?:string|undefined) {
+export function UserMsg( uid:  string, nickname: string, msg: string,chatId?:string|undefined) {
     let UserMsg: Message = {
-        msgSend: sendUid,
-        msgReceiver: receverUid,
+        uid: uid,
+        nickname:nickname,
+        // avatar:"",
         content: msg,
         msgType: 1,
         chatId : chatId,
@@ -42,10 +44,11 @@ export function UserMsg( sendUid:  string, receverUid: string, msg: string,chatI
  * @param msg
  * @constructor
  */
-export function GroupMsg(sendUid: string, receverUid: string, msg: string) {
+export function GroupMsg(uid: string, nickname: string, msg: string) {
     let GroupMsg: Message = {
-        msgSend: sendUid,
-        msgReceiver: receverUid,
+        uid: uid,
+        nickname:"系统",
+        avatar:"",
         content: msg,
         msgType: 2
     }
@@ -54,10 +57,12 @@ export function GroupMsg(sendUid: string, receverUid: string, msg: string) {
 
 export function HeartMsg(uid: string) {
     let GroupMsg: Message = {
-        msgSend: uid,
-        msgReceiver: "-1",
+        uid: uid,
+        nickname:"系统",
+        avatar:"",
         content: "ping",
-        msgType: -99
+        msgType: -99,
+        chatId:""
     }
     return GroupMsg;
 }

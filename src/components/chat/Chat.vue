@@ -11,7 +11,7 @@
               :infinite-scroll-disabled="disabled"
           >
             <li v-for="(item ,index) in chatContact" :key="index" class="list-item" @click="changeBox(item)">
-              {{ item.nickname }}
+              {{ item }}
             </li>
           </ul>
 
@@ -19,10 +19,10 @@
       </div>
       <div class="chat_right">
         <div class="chatbox">
-          <span v-if="chatBox.nickname != null">{{ chatBox.nickname }}</span>
+          <span v-if="checkClient.nickname != null">{{ checkClient.nickname }}</span>
 
-          <div class="chat_box" :class="item.receiverUid != userStore.user!.userId ? 'chat_send':'chat_receiver'"
-               v-for="(item,index) in chatBox.list" :key="index">
+          <div class="chat_box" :class="item.uid != userStore.user!.userId ? 'chat_send':'chat_receiver'"
+               v-for="(item,index) in chatBox" :key="index">
             <!--            <el-image></el-image>-->
             {{ item.content }}<br/>
           </div>
@@ -42,9 +42,9 @@
 
 <script setup lang="ts">
 
-import { onMounted, ref, watch} from 'vue'
+import {onMounted, ref, watch} from 'vue'
 import {User} from "@/api/User";
-import {Message, MessageBox, MessageDetail, notifi} from "@/api/Message";
+import {getUnReadMessage, Message, MessageBox, MessageDetail, notifi} from "@/api/Message";
 import {useRoute} from "vue-router";
 import {useWebSocket} from "@/websocket/mywebsocket";
 import {UserMsg} from "@/websocket/websocketApi";
@@ -52,39 +52,62 @@ import {ChatRelation, getAllChatRelation, getChatRelationByChatId} from "@/api/C
 import {getLocalStorage, setLocalStorage} from "@/utils/localStorage";
 import {useUserStore} from "@/store";
 import {ElMessage} from "element-plus";
+
 const rt = useRoute();
 const userStore = useUserStore()
 const msgReceiver = ref<string>("");
 const msgContent = ref<string>("");
-const chatBox = ref<MessageBox[]>([]);
+const chatBox = ref<Message[]>([]);
 const chatContact = ref<ChatRelation[]>([]);
 const {connect, messages} = useWebSocket();
 
 const checkClient = ref({
-  checkId:"",
-  checkChatId:"",
+  uid: "",
+  chatId: "",
+  nickname: "",
+  avatar: "",
+  content: "",
+  msgType:"",
+
 })
 
 //获取全部的用户对象
 onMounted(async () => {
   // console.log("async",userStore.user!.userId)
   //获取当前用户的全部聊天关系
-  let { data }  = await getAllChatRelation(userStore.user!.userId as string);
+  let {data} = await getAllChatRelation(userStore.user!.userId as string);
 
   //获取全部的关系集合
-  let arr:string[] = data;
-  console.log(arr + "arrr")
-  for (let i = 0; i < arr.length; i++){
-
+  let arr: string[] = data;
+  // console.log(arr + "arrr")
+  for (let i = 0; i < arr.length; i++) {
     //遍历本地缓存是否拥有该聊天记录
-     let item = localStorage.getItem(arr[i]);
-     console.log("item",item)
-     if (item != null){
-       // console.log("json",JSON.parse(item))
-       let chat =  JSON.parse(item);
-       chatContact.value!.push(chat)
-     }
+    let item = localStorage.getItem("relation"+arr[i]);
+    // console.log("item", item)
+    if (item != null) {
+      // console.log("json",JSON.parse(item))
+      let chat = JSON.parse(item);
+      chatContact.value!.push(chat)
+    }
   }
+
+  ///获取未读的消息 添加到集合中
+  // 如果缓存中拥有该聊天记录就在聊天框上显示新消息的ui 并且把该聊天框移动到最上面
+  // 如果没有该聊天记录就去添加一个
+  //先实现最基本的功能
+  // 获取未读的消息
+   let temp  = await getUnReadMessage(userStore.user!.userId as string);
+  console.log("ts list集合怎么通过属性获取对应的对象")
+  console.log(temp.data)
+    if (temp.data.size){
+      //大于零代表有未读的消息 遍历未读的消息集合去判断本地是否有记录
+      for(let i = 0 ; i < temp.data.size ;i++){
+        console.log(i);
+        //先查看本地是否拥有这个
+        // const item = chatContact.value.find(item => item.chatId == temp.data.values()[i])
+        // console.log(item + "找到了")
+      }
+    }
 
   connect(userStore.user!.userId as string);
   // console.log("chatId",rt.query.chatId)
@@ -92,25 +115,25 @@ onMounted(async () => {
   const chat = localStorage.getItem(rt.query.chatId as string)
   // console.log("当前的chat",chat)
 
-  if (chat != null && userStore.user!.userId as string!= null){
+  if (chat != null && userStore.user!.userId as string != null) {
     let data = JSON.parse(chat)
     // console.log("BUWEIkong",data)
     // console.log("chatbox",chatBox)
-    chatBox.value  = data
-  }else{
+    chatBox.value = data
+  } else {
     //为空发送一个请求去后台获取该聊天关系 然后存入聊天框
-      const {data}  = await getChatRelationByChatId(rt.query.chatId as string);
-      // console.log("weikong",data)
-      chatContact.value!.push(data);
-      // console.log("chatcontact",chatContact)
+    const {data} = await getChatRelationByChatId(rt.query.chatId as string);
+    chatContact.value!.push(data);
+    //存入浏览器缓存中
+    localStorage.setItem("relation"+rt.query.chatId as string,JSON.stringify(data))
   }
 
 })
+
 function send() {
-  let msg = UserMsg(userStore.user!.userId as string, checkClient.value.checkId, msgContent.value,
-      checkClient.value.checkChatId);
+  let msg = UserMsg(checkClient.value.uid, checkClient.value.uid, msgContent.value,
+      checkClient.value.chatId);
   useWebSocket().sendMessage(msg);
-  console.log("test",msg);
   //并且把当前的消息存入list集合中并且存入缓存
   chatBox.value.push(msg);
   msgContent.value = "";
@@ -120,60 +143,61 @@ function send() {
 /**
  * 监听message中的数据变话  这边需要加value要不然不会监听到
  */
-watch(chatBox.value, (newMessages: any) => {
-  // 将新消息添加到当前聊天框中
-  console.log(newMessages)
-  //转成对象
-  const data = JSON.parse(newMessages);
-  console.log(data)
-  //获取到了新的消息把他添加到list集合中并且更新缓存中的消息
-  //获取当前的chatbox 存入list中
-  if (chatBox.value != null) {
-    chatBox.value.push(data)
-  }
-  // if (chatBox.value && chatBox.value.chatId) {
-  //   chatBox.value.list.push(...newMessages);
-  // }
-},);
+// watch(chatBox.value, (newMessages: any) => {
+//   // 将新消息添加到当前聊天框中
+//   // console.log(newMessages)
+//   //转成对象
+//   const data = JSON.parse(newMessages);
+//   // console.log(data)
+//   //获取到了新的消息把他添加到list集合中并且更新缓存中的消息
+//   //获取当前的chatbox 存入list中
+//   if (chatBox.value != null) {
+//     chatBox.value.push(data)
+//   }
+//   // if (chatBox.value && chatBox.value.chatId) {
+//   //   chatBox.value.list.push(...newMessages);
+//   // }
+// },);
 /**
  * 把消息存储到浏览器上 可以使用浏览器缓存localstorage 和 浏览器数据库 indexDB 这里采用浏览器缓存方便使用 数据量打的时候需要使用indexdb
  * 切换聊天用户
  * @param str
  */
-const changeBox = (str: Message) =>{
-    console.log(str + "sssssssss")
-  checkClient.value.checkChatId = str.chatId!
+const changeBox = (str: ChatRelation) => {
+
+  //判断chatbox是否为空 如果不为空就代表 用户切换了聊天框 先把旧的聊天信息存入缓存中
+  if (chatBox.value.length > 0 ) {
+    setLocalStorage(checkClient.value.chatId, chatBox.value);
+  }
+  // console.log(str + "sssssssss")
+  checkClient.value.chatId = str.chatId
+  checkClient.value.uid=str.uid
+  checkClient.value.nickname = str.nickname
+  checkClient.value.avatar = str.avatar
   // checkClient.value.checkId = str.receiverUid
   //改变接收用户
-  console.log("ssssss",str)
-  checkClient.value.checkId = str.uid!
-  //判断chatbox是否为空 如果不为空就代表 用户切换了聊天框 先把旧的聊天信息存入缓存中
-  if (chatBox.value != null) {
-    setLocalStorage(checkClient.value.checkChatId, chatBox.value);
-  }
+  // console.log("ssssss", str)
+  checkClient.value.uid = str.uid
   //先从浏览器缓存中查询是否有缓存的聊天记录
-  let date = getLocalStorage(str.chatId!);
+  let date = getLocalStorage(str.chatId);
 
-  //然后再把查询到的消息添加进chatbox
-  if (date == null) {
-    chatBox.value.push(str)
-  } else {
+
+  //有缓存就把数据添加到聊天框中
+  if (date != null) {
     chatBox.value = date
-    chatBox.value.push(...str)
   }
-  // console.log(str)
   // msgReceiver.value = str.chatUid;
   //发送一个异步请求告知后台读取过了这个消息
-  notifi(str.chatId)
+  notifi(str.chatId as string)
 }
 /**
- * 使用定时器去监听chatbox的数量是否发生了改变
+ * 使用监听器去监听chatbox的数量是否发生了改变
  * 如果当前chatbox的数量发生了改变就代表有新的消息
  * 就可以把他存入缓存中
  */
 watch(chatBox, (newVal: any) => {
   // console.log("s数量发送了变话")
-  // console.log(newVal.chatId)
+  console.log(newVal)
   setLocalStorage(newVal.id, newVal)
   // setLocalStorage()
 }, {deep: true})
@@ -228,9 +252,11 @@ watch(chatBox, (newVal: any) => {
 .infinite-list-wrapper .list-item + .list-item {
 //margin-top: 10px;
 }
-.list-item:hover{
-  cursor:pointer;
+
+.list-item:hover {
+  cursor: pointer;
 }
+
 .chat_content {
   display: flex;
   flex-direction: row;
