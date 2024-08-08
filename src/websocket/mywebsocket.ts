@@ -33,7 +33,8 @@ export function useWebSocket() {
                 clearTimeout(heartbeatTimeout.value as number);
             }else{
                 //通过监听器来监听数据的变话
-                messages.value!.push(msg)
+                // messages.value.slice(0,messages.value.length)
+                messages.value.push(msg)
             }
 
         };
@@ -54,7 +55,6 @@ export function useWebSocket() {
         // console.log("心跳检测启动")
         heartbeatInterval.value = setInterval(() => {
             // console.log("发送心跳检测")
-
             let s = HeartMsg(uid);
             console.log(s);
             ws.value!.send(JSON.stringify(s));

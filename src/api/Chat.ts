@@ -19,8 +19,8 @@ export function createChatRelation(relation:ChatRelationForm){
     return request.post<string>('/chat/relation',relation);
 }
 
-export function getChatRelationByChatId(chatId:string){
-    return request.get<ChatRelation>('/chat/chatIdRelation/'+chatId)
+export function getChatRelationByChatId(chatId:string,uid:string){
+    return request.get<ChatRelation>('/chat/chatIdRelation/'+chatId+"/"+uid)
 }
 
 export function getAllChatRelation(uid:string){

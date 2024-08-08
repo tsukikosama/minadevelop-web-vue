@@ -2,7 +2,7 @@
  * 清楚对象的全部值
  * @param key
  */
-export function clearObject(key:any){
+export function clearObject(key: any) {
     Object.keys(key).forEach(item => key[item] = '')
 }
 
@@ -29,3 +29,17 @@ export const formatDate = (date: Date, format = 'yyyy-MM-dd HH:mm:ss'): string =
     return format.replace(/yyyy|MM|dd|HH|mm|ss/g, (match) => formatMap[match])
 }
 
+/**
+ * 集合属性分组
+ */
+
+export const groupBy =  (array: [], key: string) => {
+    return array.reduce((result, currentValue) => {
+        const groupKey = currentValue[key];
+        if (!result[groupKey]) {
+            result[groupKey] = [];
+        }
+        result[groupKey].push(currentValue);
+        return result;
+    }, {} as { [key: string]: [] });
+}

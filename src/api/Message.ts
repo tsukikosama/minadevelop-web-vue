@@ -8,7 +8,8 @@ export interface Message {
     nickname:string
     content: string;
     msgType: number,
-    chatId?: string
+    chatId?: string,
+    receiverNickname?: string
 }
 
 export interface MessageBox {
@@ -42,7 +43,7 @@ export function getMsgList(userId: string) {
 }
 
 /**
- * 获取维度消息的数量
+ * 获取未读消息的数量
  * @param chatId
  */
 export function notifi(chatId: string) {
@@ -55,4 +56,8 @@ export function notifi(chatId: string) {
 
 export function getUnReadMessage(uid: string) {
     return request.get<Map<string,Message[]>>('/message/unread/'+uid)
+}
+
+export function getUnRead(chatId: string) {
+    return request.get<Message[]>('/message/unreadDetail/' + chatId);
 }
