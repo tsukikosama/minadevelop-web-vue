@@ -24,7 +24,7 @@
         <div class="chatbox">
           <span v-if="checkClient.nickname != null">{{ checkClient.nickname }}</span>
 
-          <div class="chat_box" :class="item.uid != userStore.user!.userId ? 'chat_send':'chat_receiver'"
+          <div class="chat_box" :class="item.uid !=checkClient.uid ? 'chat_send':'chat_receiver'"
                v-for="(item,index) in chatBox" :key="index">
             <!--            <el-image></el-image>-->
             {{ item.content }}<br/>
@@ -63,7 +63,7 @@ const msgReceiver = ref<string>("");
 const msgContent = ref<string>("");
 const chatBox = ref<Message[]>([]);
 const chatContact = ref<ChatRelation[]>([]);
-const {connect,sendMessage,messages} = useWebSocket();
+const {connect,sendMessage,messages,newMessage} = useWebSocket();
 const checkClient = ref({
   uid: "",
   chatId: "",
@@ -162,7 +162,7 @@ onMounted(async () => {
 })
 
 function send() {
-  let msg = UserMsg(checkClient.value.uid, checkClient.value.uid, msgContent.value,
+  let msg = UserMsg(checkClient.value.uid, checkClient.value.nickname, msgContent.value,
       checkClient.value.chatId);
   useWebSocket().sendMessage(msg);
   //并且把当前的消息存入list集合中并且存入缓存
@@ -243,11 +243,42 @@ watch(chatBox.value, (newVal: any) => {
   setLocalStorage("relation"+checkClient.value.chatId, newVal)
   // setLocalStorage()
 }, {deep: true})
-watch(messages,(newVal: Message[],oldVal : Message[]) => {
-  console.log("newVal", newVal)
-  // const arr:Message[] = [...newVal,...oldVal];
 
-  })
+watch(newMessage,async (newVal: Message) => {
+  // console.log("newmessage",newVal)
+  //判断用户是否在联系人列表中
+  console.log("结果")
+  if (chatContact.value.some(item =>item.chatId === newVal.chatId)){
+    console.log("1")
+    //存在 把这个属性从集合总移除 然后重新添加进去
+   const index =  chatContact.value.findIndex(item =>item.chatId === newVal.chatId);
+   const [temp] =  chatContact.value.slice(index,1);
+   chatContact.value.unshift(temp)
+
+  }else{
+    // console.log("2")
+    //不存在先去后台查询一下是否有该关系 如果没有创建一个然后存入浏览器缓存中
+    const {data}  = await getChatRelationByChatId(newVal.chatId as string,userStore.user!.userId as string);
+    console.log(data,"wwwwwww")
+    chatContact.value!.push(data);
+    //存入浏览器缓存中
+    localStorage.setItem(rt.query.chatId as string,JSON.stringify(data))
+  }
+  //判断当前聊天的对象是否是这个对象如果不是当前的对象 需要给当前的对象添加未读的消息条数
+  if (newVal.chatId === checkClient.value.chatId){
+    // console.log("3")
+    chatBox.value.push(newVal)
+  }else{
+    // console.log("4")
+    const index =  chatContact.value.find(item =>item.chatId === newVal.chatId) as ChatRelation;
+    console.log(index.unread)
+    if (index.unread === undefined){
+      index.unread = 0;
+    }
+    index.unread = index.unread as number + 1;
+  }
+
+},)
 </script>
 <style scoped>
 .chat {

@@ -9,12 +9,13 @@ const ws = ref<WebSocket | null>(null);
 const heartbeatInterval = ref<number | null>(null);
 const heartbeatTimeout = ref<number | null>(null);
 const HEARTBEAT_INTERVAL: number = 1000 * 30 ; // 心跳间隔（毫秒）
-const HEARTBEAT_TIMEOUT: number = 1000 * 50; // 心跳超时（毫秒）
+const HEARTBEAT_TIMEOUT: number = 1000 * 45; // 心跳超时（毫秒）
 
 export function useWebSocket() {
     // const  rt  = useRoute();
 
     const messages = ref<any[]>([]);
+    const newMessage = ref<any>()
     // const uid = rt.query.uid as string
     function connect(uid:string) {
         ws!.value = new WebSocket('ws://localhost:8099/websocket?userId='+uid);
@@ -22,28 +23,26 @@ export function useWebSocket() {
             console.log('开始连接');
             startHeartbeat(uid);
         };
-
         ws.value.onmessage = function (event) {
             // console.log(event,"接收到了心跳")
             let receivedMessage = event.data;
             const msg = JSON.parse(receivedMessage);
+            console.log("新的消息",msg)
             if (msg.content === 'pong') {
                 // console.log('Heartbeat received');
                 // console.log("心跳检测完毕");
                 clearTimeout(heartbeatTimeout.value as number);
             }else{
                 //通过监听器来监听数据的变话
-                // messages.value.slice(0,messages.value.length)
+                newMessage.value = msg;
                 messages.value.push(msg)
             }
 
         };
-
         ws.value.onclose = function () {
             console.log('连接关闭');
             stopHeartbeat();
         };
-
         ws.value.onerror = function (error) {
             console.error('WebSocket Error: ' + error);
             stopHeartbeat();
@@ -61,6 +60,7 @@ export function useWebSocket() {
             heartbeatTimeout.value = setTimeout(() => {
                 console.log('没有心跳连接关闭');
                 ws.value!.close();
+                stopHeartbeat();
             }, HEARTBEAT_TIMEOUT);
         }, HEARTBEAT_INTERVAL);
     }
@@ -74,6 +74,9 @@ export function useWebSocket() {
         ws.value!.send(JSON.stringify(message));
     }
 
+    function getLatestMessage() {
+        return newMessage.value;
+    }
     function getWs(){
         return ws.value;
     }
@@ -81,7 +84,9 @@ export function useWebSocket() {
         connect,
         sendMessage,
         getWs,
-        messages
+        messages,
+        newMessage,
+        getLatestMessage
     };
 
 
